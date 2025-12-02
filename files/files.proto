@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package files;
+
+service FilesService {
+  rpc GetFile (FileRequest) returns (FileResponse);
+}
+
+message FileRequest {
+  int32 file_id = 1;
+}
+
+message FileResponse {
+  string id = 1;
+  string filename = 2;
+  string path = 3;
+  int64 size = 4;
+  int32 user_id = 5;
+  string created_at = 6;
+}
+

@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: internalcrm
+      POSTGRES_USER: crmuser
+      POSTGRES_PASSWORD: crmpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crmuser"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  users:
+    build: ./users
+    ports:
+      - "8001:8000"
+      - "50051:50051"
+    environment:
+      DATABASE_URL: postgresql://crmuser:crmpass@postgres:5432/internalcrm
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./users:/app
+
+  payments:
+    build: ./payments
+    ports:
+      - "8002:8000"
+      - "50052:50052"
+    environment:
+      DATABASE_URL: postgresql://crmuser:crmpass@postgres:5432/internalcrm
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./payments:/app
+
+  notifications:
+    build: ./notifications
+    ports:
+      - "8003:3000"
+    environment:
+      DATABASE_URL: postgresql://crmuser:crmpass@postgres:5432/internalcrm
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./notifications:/app
+
+  files:
+    build: ./files
+    ports:
+      - "8004:8000"
+      - "50054:50054"
+    environment:
+      DATABASE_URL: postgresql://crmuser:crmpass@postgres:5432/internalcrm
+      REDIS_URL: redis://redis:6379/0
+      FILES_DIR: /app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./files:/app
+      - files_storage:/app/storage
+
+volumes:
+  postgres_data:
+  files_storage:

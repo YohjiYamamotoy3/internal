@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package users;
+
+service UsersService {
+  rpc GetUser (UserRequest) returns (UserResponse);
+  rpc CreateUser (CreateUserRequest) returns (UserResponse);
+}
+
+message UserRequest {
+  int32 user_id = 1;
+}
+
+message CreateUserRequest {
+  string email = 1;
+  string name = 2;
+  string role = 3;
+}
+
+message UserResponse {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  string role = 4;
+  bool active = 5;
+  string created_at = 6;
+}
+

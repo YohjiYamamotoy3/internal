@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package payments;
+
+service PaymentsService {
+  rpc CreatePayment (CreatePaymentRequest) returns (PaymentResponse);
+  rpc GetPayment (PaymentRequest) returns (PaymentResponse);
+}
+
+message CreatePaymentRequest {
+  int32 user_id = 1;
+  double amount = 2;
+  string currency = 3;
+  string description = 4;
+}
+
+message PaymentRequest {
+  int32 payment_id = 1;
+}
+
+message PaymentResponse {
+  string id = 1;
+  int32 user_id = 2;
+  double amount = 3;
+  string currency = 4;
+  string status = 5;
+  string created_at = 6;
+}
+

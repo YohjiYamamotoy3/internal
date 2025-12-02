@@ -1,0 +1,60 @@
+stages:
+  - test
+  - build
+
+variables:
+  POSTGRES_DB: internalcrm
+  POSTGRES_USER: crmuser
+  POSTGRES_PASSWORD: crmpass
+
+services:
+  - postgres:15-alpine
+  - redis:7-alpine
+
+test:users:
+  stage: test
+  image: python:3.11
+  before_script:
+    - cd users
+    - pip install -r requirements.txt
+    - pip install pytest httpx
+  script:
+    - python -m pytest test_users.py || true
+
+test:payments:
+  stage: test
+  image: python:3.11
+  before_script:
+    - cd payments
+    - pip install -r requirements.txt
+    - pip install pytest httpx
+  script:
+    - python -m pytest test_payments.py || true
+
+test:files:
+  stage: test
+  image: python:3.11
+  before_script:
+    - cd files
+    - pip install -r requirements.txt
+    - pip install pytest httpx
+  script:
+    - python -m pytest test_files.py || true
+
+test:notifications:
+  stage: test
+  image: node:18
+  before_script:
+    - cd notifications
+    - npm install
+  script:
+    - npm test || true
+
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker-compose build
+
